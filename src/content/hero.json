@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "layout": "full",
+  "slides": [
+    {
+      "title_line1": "Pure Nature",
+      "title_line2": "Organic Living",
+      "description": "Discover the power of nature with our handcrafted, chemical-free organic products. Made with love, delivered with care.",
+      "button_text": "Shop Now",
+      "button_link": "#products",
+      "background_image": "/media/hero-bg.jpg",
+      "overlay_opacity": 20
+    },
+    {
+      "title_line1": "Handmade with",
+      "title_line2": "Natural Love",
+      "description": "Each product is carefully crafted using traditional methods passed down through generations.",
+      "button_text": "Learn More",
+      "button_link": "#about",
+      "background_image": "/media/hero-bg-2.jpg",
+      "overlay_opacity": 25
+    }
+  ]
+}

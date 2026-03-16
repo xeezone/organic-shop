@@ -1,0 +1,39 @@
+{
+  "enabled": true,
+  "title": "Our Story of Natural Wellness",
+  "content_blocks": [
+    {
+      "heading": "Born from Passion",
+      "text": "Born from a passion for pure, natural living, Pure Nature began as a small family initiative to create chemical-free products that nurture both body and soul. Every product is handcrafted with traditional methods passed down through generations."
+    },
+    {
+      "heading": "Our Philosophy",
+      "text": "We believe that nature provides everything we need for healthy living. Our commitment to organic ingredients, sustainable practices, and artisanal craftsmanship ensures that every product delivers the purest form of natural wellness."
+    }
+  ],
+  "stats": [
+    {
+      "number": "50+",
+      "label": "Products"
+    },
+    {
+      "number": "10K+",
+      "label": "Happy Customers"
+    },
+    {
+      "number": "15+",
+      "label": "Years Experience"
+    },
+    {
+      "number": "100%",
+      "label": "Organic"
+    }
+  ],
+  "promise": {
+    "title": "100% Natural Promise",
+    "text": "No chemicals, no compromises",
+    "icon": "leaf"
+  },
+  "image": "/media/about-us.jpg",
+  "image_alt": "Artisan crafting organic products"
+}

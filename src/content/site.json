@@ -1,0 +1,42 @@
+{
+  "store_name": "Pure Nature",
+  "tagline": "Organic Handmade Products",
+  "description": "Premium organic handmade products for natural wellness",
+  "keywords": "organic, handmade, natural, skincare, herbal oils, soaps",
+  "currency": "PKR",
+  "currency_symbol": "PKR",
+  "whatsapp_number": "923001234567",
+  "whatsapp_message": "Hello! I'm interested in your organic products.",
+  "email": "hello@purenature.com",
+  "phone": "+92 300 1234567",
+  "address": "123 Organic Street, Natural City, Pakistan",
+  "working_hours": "Mon-Sat: 9AM - 8PM",
+  "social_media": {
+    "facebook": "https://facebook.com/purenature",
+    "instagram": "https://instagram.com/purenature",
+    "twitter": "https://twitter.com/purenature",
+    "pinterest": "https://pinterest.com/purenature"
+  },
+  "navigation": [
+    {
+      "label": "Home",
+      "link": "#home",
+      "order": 1
+    },
+    {
+      "label": "About",
+      "link": "#about",
+      "order": 2
+    },
+    {
+      "label": "Products",
+      "link": "#products",
+      "order": 3
+    },
+    {
+      "label": "Contact",
+      "link": "#contact",
+      "order": 4
+    }
+  ]
+}

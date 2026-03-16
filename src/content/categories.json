@@ -1,0 +1,42 @@
+{
+  "enabled": true,
+  "title": "Our Product Categories",
+  "subtitle": "Explore our carefully curated collection of organic, handmade wellness products",
+  "categories": [
+    {
+      "id": "skincare",
+      "name": "Organic Skincare",
+      "description": "Natural face & body care",
+      "image": "/media/categories/skincare.jpg",
+      "display_order": 1
+    },
+    {
+      "id": "oils",
+      "name": "Herbal Oils",
+      "description": "Pure essential & carrier oils",
+      "image": "/media/categories/oils.jpg",
+      "display_order": 2
+    },
+    {
+      "id": "soaps",
+      "name": "Natural Soaps",
+      "description": "Handcrafted cleansing bars",
+      "image": "/media/categories/soaps.jpg",
+      "display_order": 3
+    },
+    {
+      "id": "foods",
+      "name": "Organic Foods",
+      "description": "Pure honey & superfoods",
+      "image": "/media/categories/foods.jpg",
+      "display_order": 4
+    },
+    {
+      "id": "teas",
+      "name": "Herbal Teas",
+      "description": "Wellness tea blends",
+      "image": "/media/categories/teas.jpg",
+      "display_order": 5
+    }
+  ]
+}

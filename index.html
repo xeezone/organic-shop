@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="site-title">Pure Nature - Organic Store</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    
+    <style>
+        :root {
+            --primary: #6B7C5B;
+            --secondary: #F5F3F0;
+        }
+        
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .font-logo { font-family: 'Pacifico', cursive; }
+        
+        .hero-slide {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .product-modal {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .category-filter.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .quantity-btn {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quantity-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .custom-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: var(--primary);
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 bg-white">
+    <!-- Loading Spinner -->
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading Pure Nature...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="app" class="hidden"></div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="product-modal fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6" id="modal-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="product-modal fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-6" id="order-form-container"></div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-serif text-2xl font-bold">Your Cart</h2>
+                <button onclick="toggleCart()" class="p-2 hover:bg-gray-100 rounded-full">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+            <div id="cart-items" class="flex-1 overflow-y-auto"></div>
+            <div class="border-t pt-4 mt-4">
+                <div class="flex justify-between mb-2">
+                    <span class="font-semibold">Subtotal:</span>
+                    <span id="cart-subtotal">PKR 0</span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90">
+                    Checkout via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let siteData = {};
+        let products = [];
+        let categories = [];
+        let testimonials = [];
+        let faqs = [];
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Load all content
+        async function loadContent() {
+            try {
+                // Load all JSON files
+                const [site, hero, about, whyChoose, cats, bestSellers, ordering, promise, footer] = await Promise.all([
+                    fetch('/src/content/site.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/hero.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/about.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/why-choose.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/categories.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/best-sellers.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/ordering.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/promise.json').then(r => r.json()).catch(() => ({})),
+                    fetch('/src/content/footer.json').then(r => r.json()).catch(() => ({}))
+                ]);
+
+                // Load products collection
+                const productsResponse = await fetch('/src/content/products/index.json');
+                const productsList = await productsResponse.json();
+                products = await Promise.all(productsList.map(async (p) => {
+                    const res = await fetch(`/src/content/products/${p.file}`);
+                    return res.json();
+                }));
+
+                // Load testimonials collection
+                const testimonialsResponse = await fetch('/src/content/testimonials/index.json');
+                const testimonialsList = await testimonialsResponse.json();
+                testimonials = await Promise.all(testimonialsList.map(async (t) => {
+                    const res = await fetch(`/src/content/testimonials/${t.file}`);
+                    return res.json();
+                }));
+
+                // Load FAQs collection
+                const faqsResponse = await fetch('/src/content/faq/index.json');
+                const faqsList = await faqsResponse.json();
+                faqs = await Promise.all(faqsList.map(async (f) => {
+                    const res = await fetch(`/src/content/faq/${f.file}`);
+                    return res.json();
+                }));
+
+                // Store in global state
+                siteData = {
+                    site, hero, about, whyChoose,
+                    categories: cats,
+                    bestSellers, ordering, promise, footer,
+                    products: products.filter(p => p.in_stock !== false),
+                    testimonials: testimonials.filter(t => t.approved !== false),
+                    faqs: faqs.sort((a,b) => (a.order || 0) - (b.order || 0))
+                };
+
+                // Render the site
+                renderSite();
+                
+                // Hide loading spinner
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                // Show error message
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-center text-red-600">
+                        <i class="ri-error-warning-line text-5xl mb-4"></i>
+                        <p>Error loading content. Please try again.</p>
+                        <button onclick="loadContent()" class="mt-4 bg-primary text-white px-6 py-2 rounded-lg">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Render the entire site
+        function renderSite() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <!-- Navigation -->
+                ${renderNavigation()}
+                
+                <!-- Hero Section -->
+                ${renderHero()}
+                
+                <!-- About Section -->
+                ${renderAbout()}
+                
+                <!-- Why Choose Us -->
+                ${renderWhyChoose()}
+                
+                <!-- Categories -->
+                ${renderCategories()}
+                
+                <!-- Products Grid -->
+                ${renderProducts()}
+                
+                <!-- Best Sellers -->
+                ${renderBestSellers()}
+                
+                <!-- How to Order -->
+                ${renderOrdering()}
+                
+                <!-- Testimonials -->
+                ${renderTestimonials()}
+                
+                <!-- Our Promise -->
+                ${renderPromise()}
+                
+                <!-- FAQ -->
+                ${renderFAQ()}
+                
+                <!-- Footer -->
+                ${renderFooter()}
+            `;
+            
+            // Initialize observers and event listeners
+            initializeObservers();
+            initializeCategoryFilters();
+            updateCartCount();
+        }
+
+        // Render functions for each section
+        function renderNavigation() {
+            const { site = {} } = siteData;
+            const navItems = site.navigation || [
+                { label: 'Home', link: '#home', order: 1 },
+                { label: 'About', link: '#about', order: 2 },
+                { label: 'Products', link: '#products', order: 3 },
+                { label: 'Contact', link: '#contact', order: 4 }
+            ];
+            
+            return `
+                <nav class="bg-white shadow-sm sticky top-0 z-40">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between items-center h-16">
+                            <div class="font-logo text-2xl text-primary">${site.store_name || 'Pure Nature'}</div>
+                            <div class="hidden md:flex space-x-8">
+                                ${navItems.sort((a,b) => a.order - b.order).map(item => `
+                                    <a href="${item.link}" class="text-gray-700 hover:text-primary transition-colors">${item.label}</a>
+                                `).join('')}
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <button onclick="toggleCart()" class="relative">
+                                    <i class="ri-shopping-cart-line text-2xl"></i>
+                                    <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                                </button>
+                                <button onclick="openWhatsApp()" class="bg-primary text-white px-6 py-2 rounded-button whitespace-nowrap hover:bg-opacity-90 transition-colors">
+                                    <i class="ri-whatsapp-line mr-2"></i>WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            `;
+        }
+
+        function renderHero() {
+            const { hero = {} } = siteData;
+            if (!hero.enabled) return '';
+            
+            const slides = hero.slides || [{
+                title_line1: 'Pure Nature',
+                title_line2: 'Organic Living',
+                description: 'Discover the power of nature with our handcrafted products.',
+                button_text: 'Shop Now',
+                button_link: '#products',
+                background_image: '/media/default-hero.jpg',
+                overlay_opacity: 20
+            }];
+            
+            return `
+                <section id="home" class="relative">
+                    ${slides.map((slide, index) => `
+                        <div class="hero-slide min-h-screen flex items-center relative ${index > 0 ? 'hidden' : ''}" 
+                             style="background-image: url('${slide.background_image}');">
+                            <div class="absolute inset-0 bg-${slide.overlay_color || 'black'} bg-opacity-${slide.overlay_opacity || 20}"></div>
+                            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                                <div class="max-w-2xl">
+                                    <h1 class="font-serif text-5xl md:text-6xl font-bold text-${slide.text_color || 'white'} mb-6 leading-tight">
+                                        ${slide.title_line1}<br>
+                                        <span class="text-yellow-200">${slide.title_line2}</span>
+                                    </h1>
+                                    <p class="text-xl text-${slide.text_color || 'white'} mb-8 leading-relaxed">${slide.description}</p>
+                                    <a href="${slide.button_link}" class="inline-block bg-yellow-500 text-gray-900 px-8 py-4 text-lg font-semibold rounded-button hover:bg-yellow-400 transition-colors">
+                                        ${slide.button_text}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    
+                    ${slides.length > 1 ? `
+                        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                            ${slides.map((_, index) => `
+                                <button class="w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition" 
+                                        onclick="changeHeroSlide(${index})"></button>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </section>
+            `;
+        }
+
+        function renderAbout() {
+            const { about = {} } = siteData;
+            if (!about.enabled) return '';
+            
+            return `
+                <section id="about" class="py-20 bg-secondary">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="grid md:grid-cols-2 gap-12 items-center">
+                            <div class="fade-in">
+                                <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">${about.title || 'Our Story'}</h2>
+                                ${(about.content_blocks || []).map(block => `
+                                    <div class="mb-6">
+                                        ${block.heading ? `<h3 class="text-xl font-semibold mb-2">${block.heading}</h3>` : ''}
+                                        <p class="text-lg text-gray-700 leading-relaxed">${block.text}</p>
+                                    </div>
+                                `).join('')}
+                                
+                                ${about.promise ? `
+                                    <div class="flex items-center space-x-4 mt-8">
+                                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                            <i class="ri-${about.promise.icon || 'leaf'}-line text-white text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-900">${about.promise.title || '100% Natural'}</h3>
+                                            <p class="text-gray-600">${about.promise.text || 'No chemicals, no compromises'}</p>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${about.stats ? `
+                                    <div class="grid grid-cols-2 gap-4 mt-8">
+                                        ${about.stats.map(stat => `
+                                            <div class="text-center">
+                                                <div class="text-2xl font-bold text-primary">${stat.number}</div>
+                                                <div class="text-sm text-gray-600">${stat.label}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="fade-in">
+                                <img src="${about.image || '/media/default-about.jpg'}" alt="${about.image_alt || 'About us'}" 
+                                     class="w-full h-96 object-cover object-top rounded-2xl shadow-lg">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderWhyChoose() {
+            const { whyChoose = {} } = siteData;
+            if (!whyChoose.enabled) return '';
+            
+            return `
+                <section class="py-20">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">${whyChoose.title || 'Why Choose Us'}</h2>
+                            <p class="text-xl text-gray-600 max-w-3xl mx-auto">${whyChoose.subtitle || ''}</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            ${(whyChoose.features || []).map(feature => `
+                                <div class="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow fade-in">
+                                    <div class="w-16 h-16 bg-${feature.color === 'Yellow' ? 'yellow' : 'primary'} bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="ri-${feature.icon}-line text-${feature.color === 'Yellow' ? 'yellow-600' : 'primary'} text-2xl"></i>
+                                    </div>
+                                    <h3 class="font-serif text-xl font-semibold text-gray-900 mb-3">${feature.title}</h3>
+                                    <p class="text-gray-600">${feature.description}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderCategories() {
+            const { categories = {} } = siteData;
+            if (!categories.enabled) return '';
+            
+            return `
+                <section class="py-20 bg-secondary">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">${categories.title || 'Categories'}</h2>
+                            <p class="text-xl text-gray-600">${categories.subtitle || ''}</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                            ${(categories.categories || []).sort((a,b) => a.display_order - b.display_order).map(cat => `
+                                <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer fade-in" 
+                                     onclick="filterByCategory('${cat.id}')">
+                                    <img src="${cat.image || '/media/default-category.jpg'}" alt="${cat.name}" 
+                                         class="w-full h-48 object-cover object-top">
+                                    <div class="p-6">
+                                        <h3 class="font-serif text-xl font-semibold text-gray-900 mb-2">${cat.name}</h3>
+                                        <p class="text-gray-600 text-sm">${cat.description || ''}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderProducts() {
+            const { products = [] } = siteData;
+            
+            return `
+                <section id="products" class="py-20">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">Our Products</h2>
+                            <p class="text-xl text-gray-600">Handpicked organic products for your wellness journey</p>
+                        </div>
+                        
+                        <!-- Category Filter -->
+                        <div class="flex flex-wrap justify-center gap-4 mb-12" id="category-filters">
+                            <button class="category-filter active px-6 py-2 rounded-button border-2 border-primary bg-primary text-white" 
+                                    data-category="all">All Products</button>
+                            ${(categories.categories || []).map(cat => `
+                                <button class="category-filter px-6 py-2 rounded-button border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors" 
+                                        data-category="${cat.id}">${cat.name}</button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Products Grid -->
+                        <div id="products-grid" class="grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            ${products.map(product => `
+                                <div class="product-card bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow fade-in" 
+                                     data-category="${product.category}">
+                                    <div class="relative">
+                                        <img src="${product.main_image || '/media/default-product.jpg'}" alt="${product.name}" 
+                                             class="w-full h-48 object-cover object-top">
+                                        ${product.badges ? product.badges.map(badge => `
+                                            <span class="absolute top-2 left-2 bg-${badge.type === 'bestseller' ? 'yellow' : 'red'}-500 text-white text-xs px-2 py-1 rounded">
+                                                ${badge.text}
+                                            </span>
+                                        `).join('') : ''}
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-serif text-lg font-semibold text-gray-900 mb-2">${product.name}</h3>
+                                        <p class="text-gray-600 text-sm mb-3">${product.short_description || ''}</p>
+                                        <div class="flex items-center mb-3">
+                                            <div class="flex text-yellow-500">
+                                                ${Array.from({length: 5}, (_, i) => `
+                                                    <i class="ri-${i < Math.floor(product.rating || 0) ? 'star-fill' : 'star-line'} text-sm"></i>
+                                                `).join('')}
+                                            </div>
+                                            <span class="text-gray-500 text-sm ml-2">(${product.reviews_count || 0})</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                ${product.on_sale ? `
+                                                    <span class="text-sm text-gray-400 line-through">PKR ${product.compare_at_price}</span>
+                                                    <span class="font-semibold text-red-600 ml-2">PKR ${product.sale_price}</span>
+                                                ` : `
+                                                    <span class="font-semibold text-gray-900">PKR ${product.price}</span>
+                                                `}
+                                            </div>
+                                            <button class="bg-yellow-500 text-gray-900 px-4 py-2 text-sm rounded-button hover:bg-yellow-400 transition-colors" 
+                                                    onclick="openProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                                Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderBestSellers() {
+            const { bestSellers = {}, products = [] } = siteData;
+            if (!bestSellers.enabled) return '';
+            
+            const featuredProducts = bestSellers.products_to_show || 
+                products.filter(p => p.is_bestseller).slice(0, 3);
+            
+            return `
+                <section class="py-20 bg-secondary">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">${bestSellers.title || 'Best Sellers'}</h2>
+                            <p class="text-xl text-gray-600">${bestSellers.subtitle || ''}</p>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            ${featuredProducts.map(product => `
+                                <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow fade-in">
+                                    <img src="${product.main_image}" alt="${product.name}" class="w-full h-64 object-cover">
+                                    <div class="p-6">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span class="bg-yellow-500 text-gray-900 px-3 py-1 text-sm font-semibold rounded-full">Best Seller</span>
+                                            <div class="flex text-yellow-500">
+                                                ${Array.from({length: 5}, (_, i) => `
+                                                    <i class="ri-${i < Math.floor(product.rating || 0) ? 'star-fill' : 'star-line'}"></i>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                        <h3 class="font-serif text-2xl font-semibold text-gray-900 mb-3">${product.name}</h3>
+                                        <p class="text-gray-600 mb-4">${product.short_description || ''}</p>
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-bold text-2xl text-gray-900">PKR ${product.price}</span>
+                                            <button class="bg-primary text-white px-6 py-3 rounded-button hover:bg-opacity-90 transition-colors"
+                                                    onclick="openProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                                Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderOrdering() {
+            const { ordering = {} } = siteData;
+            if (!ordering.enabled) return '';
+            
+            return `
+                <section class="py-20">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">${ordering.title || 'How to Order'}</h2>
+                            <p class="text-xl text-gray-600">${ordering.subtitle || ''}</p>
+                        </div>
+                        <div class="grid md:grid-cols-4 gap-8">
+                            ${(ordering.steps || []).sort((a,b) => a.step_number - b.step_number).map(step => `
+                                <div class="text-center fade-in">
+                                    <div class="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <i class="ri-${step.icon}-line text-primary text-3xl"></i>
+                                    </div>
+                                    <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">
+                                        ${step.step_number}
+                                    </div>
+                                    <h3 class="font-serif text-xl font-semibold text-gray-900 mb-3">${step.title}</h3>
+                                    <p class="text-gray-600">${step.description}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderTestimonials() {
+            const { testimonials = [] } = siteData;
+            if (!testimonials.length) return '';
+            
+            return `
+                <section class="py-20 bg-secondary">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
+                            <p class="text-xl text-gray-600">What our customers say about us</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            ${testimonials.filter(t => t.featured).slice(0, 6).map(t => `
+                                <div class="bg-white p-6 rounded-xl shadow-sm fade-in">
+                                    <div class="flex text-yellow-500 mb-4">
+                                        ${Array.from({length: 5}, (_, i) => `
+                                            <i class="ri-${i < t.rating ? 'star-fill' : 'star-line'}"></i>
+                                        `).join('')}
+                                    </div>
+                                    ${t.review_title ? `<h4 class="font-semibold mb-2">${t.review_title}</h4>` : ''}
+                                    <p class="text-gray-700 mb-4">"${t.review_text}"</p>
+                                    <div class="flex items-center">
+                                        <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                            ${t.avatar ? 
+                                                `<img src="${t.avatar}" class="w-full h-full rounded-full object-cover">` : 
+                                                `<span class="text-primary font-bold">${t.avatar_initials || t.customer_name.charAt(0)}</span>`
+                                            }
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">${t.customer_name}</h4>
+                                            <p class="text-gray-600 text-sm">${t.city || ''} ${t.verified_purchase ? '✓ Verified' : ''}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderPromise() {
+            const { promise = {} } = siteData;
+            if (!promise.enabled) return '';
+            
+            return `
+                <section class="py-20">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">${promise.title || 'Our Promise'}</h2>
+                            <p class="text-xl text-gray-600 max-w-3xl mx-auto">${promise.subtitle || ''}</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-12 items-center">
+                            <div class="fade-in">
+                                <div class="space-y-8">
+                                    ${(promise.promises || []).map(p => `
+                                        <div class="flex items-start space-x-4">
+                                            <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="ri-${p.icon}-line text-primary text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-serif text-xl font-semibold text-gray-900 mb-2">${p.title}</h3>
+                                                <p class="text-gray-600">${p.description}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="fade-in">
+                                <img src="${promise.image || '/media/default-promise.jpg'}" alt="Our Promise" 
+                                     class="w-full h-96 object-cover object-center rounded-2xl shadow-lg">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderFAQ() {
+            const { faqs = [] } = siteData;
+            if (!faqs.length) return '';
+            
+            return `
+                <section class="py-20 bg-secondary">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16 fade-in">
+                            <h2 class="font-serif text-4xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+                            <p class="text-xl text-gray-600">Everything you need to know</p>
+                        </div>
+                        <div class="space-y-4" id="faq-container">
+                            ${faqs.filter(f => f.featured).concat(faqs.filter(f => !f.featured)).map(faq => `
+                                <div class="bg-white rounded-xl shadow-sm fade-in">
+                                    <button class="faq-question w-full text-left p-6 flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                            onclick="toggleFAQ(this)">
+                                        <span class="font-semibold text-gray-900">${faq.question}</span>
+                                        <i class="ri-add-line text-primary text-xl transition-transform"></i>
+                                    </button>
+                                    <div class="faq-answer hidden px-6 pb-6">
+                                        <div class="text-gray-600">${faq.answer}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderFooter() {
+            const { footer = {}, site = {} } = siteData;
+            
+            return `
+                <footer id="contact" class="bg-gray-900 text-white py-16">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        ${footer.show_newsletter ? `
+                            <div class="text-center mb-12">
+                                <h3 class="font-serif text-2xl font-semibold mb-4">${footer.newsletter_title || 'Subscribe to Our Newsletter'}</h3>
+                                <p class="text-gray-300 mb-6">${footer.newsletter_text || ''}</p>
+                                <form onsubmit="subscribeNewsletter(event)" class="max-w-md mx-auto flex gap-4">
+                                    <input type="email" placeholder="Your email" class="flex-1 px-4 py-3 rounded-lg text-gray-900">
+                                    <button type="submit" class="bg-yellow-500 text-gray-900 px-6 py-3 rounded-button font-semibold hover:bg-yellow-400">
+                                        Subscribe
+                                    </button>
+                                </form>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="grid md:grid-cols-4 gap-8 mb-12">
+                            <div class="md:col-span-2">
+                                <div class="font-logo text-3xl text-yellow-500 mb-4">${site.store_name || 'Pure Nature'}</div>
+                                <p class="text-gray-300 mb-6 max-w-md">${footer.description || ''}</p>
+                                <button onclick="openWhatsApp()" class="bg-green-600 text-white px-6 py-3 rounded-button hover:bg-green-700 transition-colors flex items-center">
+                                    <i class="ri-whatsapp-line mr-2 text-xl"></i>
+                                    ${footer.whatsapp_button_text || 'Contact on WhatsApp'}
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-serif text-xl font-semibold mb-4">${footer.quick_links_title || 'Quick Links'}</h3>
+                                <ul class="space-y-2 text-gray-300">
+                                    ${(footer.quick_links || []).map(link => `
+                                        <li>
+                                            <a href="${link.url}" class="hover:text-yellow-500 transition-colors flex items-center">
+                                                ${link.icon && link.icon !== 'none' ? `<i class="ri-${link.icon}-line mr-2"></i>` : ''}
+                                                ${link.text}
+                                            </a>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h3 class="font-serif text-xl font-semibold mb-4">${footer.categories_title || 'Categories'}</h3>
+                                <ul class="space-y-2 text-gray-300">
+                                    ${(footer.footer_categories || []).map(cat => `
+                                        <li>
+                                            <a href="#" onclick="filterByCategory('${cat.id}')" class="hover:text-yellow-500 transition-colors">
+                                                ${cat.name}
+                                            </a>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-gray-700 pt-8">
+                            <div class="flex flex-col md:flex-row justify-between items-center">
+                                <p class="text-gray-400 mb-4 md:mb-0">${footer.copyright_text || '© 2024 Pure Nature. All rights reserved.'}</p>
+                                
+                                ${footer.payment_methods ? `
+                                    <div class="flex space-x-2 mb-4 md:mb-0">
+                                        ${footer.payment_methods.map(m => `
+                                            <div class="w-10 h-6 bg-gray-800 rounded flex items-center justify-center text-xs text-gray-400">
+                                                <i class="ri-${m.icon}-line"></i>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="flex space-x-4">
+                                    ${site.social_media?.facebook ? `
+                                        <a href="${site.social_media.facebook}" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
+                                            <i class="ri-facebook-fill"></i>
+                                        </a>
+                                    ` : ''}
+                                    ${site.social_media?.instagram ? `
+                                        <a href="${site.social_media.instagram}" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
+                                            <i class="ri-instagram-line"></i>
+                                        </a>
+                                    ` : ''}
+                                    ${site.social_media?.twitter ? `
+                                        <a href="${site.social_media.twitter}" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
+                                            <i class="ri-twitter-x-fill"></i>
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            `;
+        }
+
+        // ============== UTILITY FUNCTIONS ==============
+
+        function initializeObservers() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        }
+
+        function initializeCategoryFilters() {
+            const filterButtons = document.querySelectorAll('.category-filter');
+            const productCards = document.querySelectorAll('.product-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active', 'bg-primary', 'text-white');
+                        btn.classList.add('text-primary', 'hover:bg-primary', 'hover:text-white');
+                    });
+                    
+                    this.classList.add('active', 'bg-primary', 'text-white');
+                    this.classList.remove('text-primary', 'hover:bg-primary', 'hover:text-white');
+                    
+                    productCards.forEach(card => {
+                        if (category === 'all' || card.dataset.category === category) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        }
+
+        function filterByCategory(categoryId) {
+            const button = document.querySelector(`[data-category="${categoryId}"]`);
+            if (button) {
+                button.click();
+                document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function toggleFAQ(button) {
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            if (answer.classList.contains('hidden')) {
+                answer.classList.remove('hidden');
+                icon.style.transform = 'rotate(45deg)';
+            } else {
+                answer.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function changeHeroSlide(index) {
+            const slides = document.querySelectorAll('.hero-slide');
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.remove('hidden');
+                } else {
+                    slide.classList.add('hidden');
+                }
+            });
+            
+            // Update dots
+            const dots = document.querySelectorAll('.hero-dot');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('bg-white');
+                    dot.classList.remove('bg-opacity-50');
+                } else {
+                    dot.classList.remove('bg-white');
+                    dot.classList.add('bg-opacity-50');
+                }
+            });
+        }
+
+        // ============== CART FUNCTIONS ==============
+
+        function addToCart(product, variant = null, quantity = 1) {
+            const cartItem = {
+                id: product.id || product.name,
+                name: product.name,
+                price: product.on_sale ? product.sale_price : product.price,
+                image: product.main_image,
+                quantity: quantity,
+                variant: variant
+            };
+            
+            cart.push(cartItem);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            showNotification('Product added to cart!');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            renderCart();
+        }
+
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        function toggleCart() {
+            const sidebar = document.getElementById('cart-sidebar');
+            sidebar.classList.toggle('translate-x-0');
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 mt-8">Your cart is empty</p>';
+            } else {
+                container.innerHTML = cart.map((item, index) => `
+                    <div class="flex items-center space-x-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                        <div class="flex-1">
+                            <h4 class="font-semibold">${item.name}</h4>
+                            ${item.variant ? `<p class="text-sm text-gray-600">${item.variant}</p>` : ''}
+                            <p class="text-primary font-semibold">PKR ${item.price}</p>
+                            <div class="flex items-center mt-2">
+                                <button onclick="updateCartQuantity(${index}, -1)" class="w-6 h-6 border rounded-l flex items-center justify-center">-</button>
+                                <span class="w-8 text-center border-t border-b py-1">${item.quantity}</span>
+                                <button onclick="updateCartQuantity(${index}, 1)" class="w-6 h-6 border rounded-r flex items-center justify-center">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('cart-subtotal').textContent = `PKR ${subtotal}`;
+        }
+
+        function updateCartQuantity(index, change) {
+            cart[index].quantity = Math.max(1, cart[index].quantity + change);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+            updateCartCount();
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+            
+            const message = generateWhatsAppMessage();
+            const whatsappUrl = `https://wa.me/${siteData.site.whatsapp_number || '923001234567'}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function generateWhatsAppMessage() {
+            let message = `🛍️ *New Order - ${siteData.site.store_name || 'Pure Nature'}*\n\n`;
+            message += `*Order Details:*\n`;
+            
+            cart.forEach((item, index) => {
+                message += `${index + 1}. ${item.name} - ${item.quantity} x PKR ${item.price}\n`;
+                if (item.variant) message += `   Variant: ${item.variant}\n`;
+            });
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            message += `\n*Total: PKR ${subtotal}*`;
+            message += `\n\n${siteData.site.whatsapp_greeting || 'Hello! I would like to place this order.'}`;
+            
+            return message;
+        }
+
+        // ============== PRODUCT MODAL ==============
+
+        function openProductModal(product) {
+            const modal = document.getElementById('product-modal');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-serif text-2xl font-bold text-gray-900">${product.name}</h2>
+                    <button onclick="closeProductModal()" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="ri-close-line text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <img src="${product.main_image}" alt="${product.name}" class="w-full h-80 object-cover rounded-lg mb-4" id="modal-main-image">
+                        
+                        ${product.gallery_images && product.gallery_images.length > 0 ? `
+                            <div class="flex space-x-2 overflow-x-auto">
+                                ${product.gallery_images.map(img => `
+                                    <img src="${img}" alt="" class="w-20 h-20 object-cover rounded cursor-pointer border-2 hover:border-primary" 
+                                         onclick="document.getElementById('modal-main-image').src='${img}'">
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <div class="flex text-yellow-500 mr-2">
+                                ${Array.from({length: 5}, (_, i) => `
+                                    <i class="ri-${i < Math.floor(product.rating || 0) ? 'star-fill' : 'star-line'}"></i>
+                                `).join('')}
+                            </div>
+                            <span class="text-gray-500">(${product.reviews_count || 0} reviews)</span>
+                        </div>
+                        
+                        <div class="mb-6">
+                            ${product.on_sale ? `
+                                <span class="text-2xl text-red-600 font-bold">PKR ${product.sale_price}</span>
+                                <span class="text-lg text-gray-400 line-through ml-2">PKR ${product.compare_at_price}</span>
+                            ` : `
+                                <span class="text-3xl font-bold text-gray-900">PKR ${product.price}</span>
+                            `}
+                        </div>
+                        
+                        <div class="prose mb-6">
+                            ${product.full_description || product.short_description}
+                        </div>
+                        
+                        ${product.variants && product.variants.length > 0 ? `
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Select Size/Variant</label>
+                                <div class="space-y-2">
+                                    ${product.variants.map((v, index) => `
+                                        <label class="flex items-center space-x-2 cursor-pointer">
+                                            <input type="radio" name="variant" value='${JSON.stringify(v)}' ${index === 0 ? 'checked' : ''} 
+                                                   class="custom-checkbox">
+                                            <span>${v.size} - PKR ${v.price}</span>
+                                            ${!v.in_stock ? '<span class="text-red-500 text-sm">(Out of stock)</span>' : ''}
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${product.ingredients && product.ingredients.length > 0 ? `
+                            <div class="mb-6">
+                                <h4 class="font-semibold mb-2">Key Ingredients:</h4>
+                                <ul class="list-disc list-inside text-gray-600">
+                                    ${product.ingredients.map(i => `<li>${i}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${product.benefits && product.benefits.length > 0 ? `
+                            <div class="mb-6">
+                                <h4 class="font-semibold mb-2">Benefits:</h4>
+                                <ul class="list-disc list-inside text-gray-600">
+                                    ${product.benefits.map(b => `<li>${b}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${product.how_to_use ? `
+                            <div class="mb-6">
+                                <h4 class="font-semibold mb-2">How to Use:</h4>
+                                <p class="text-gray-600">${product.how_to_use}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="flex items-center border rounded">
+                                <button class="quantity-btn px-3 py-2" onclick="changeQuantity(-1)">-</button>
+                                <input type="number" id="modal-quantity" value="1" min="1" class="w-16 text-center border-0">
+                                <button class="quantity-btn px-3 py-2" onclick="changeQuantity(1)">+</button>
+                            </div>
+                            
+                            <button onclick="addToCartFromModal(${JSON.stringify(product).replace(/"/g, '&quot;')})" 
+                                    class="flex-1 bg-yellow-500 text-gray-900 py-3 rounded-button font-semibold hover:bg-yellow-400">
+                                Add to Cart
+                            </button>
+                        </div>
+                        
+                        ${product.specifications && product.specifications.length > 0 ? `
+                            <div class="border-t pt-4">
+                                <h4 class="font-semibold mb-2">Specifications:</h4>
+                                <dl class="grid grid-cols-2 gap-2 text-sm">
+                                    ${product.specifications.map(s => `
+                                        <dt class="text-gray-600">${s.label}:</dt>
+                                        <dd class="text-gray-900">${s.value}</dd>
+                                    `).join('')}
+                                </dl>
+                            </div>
+                        ` : ''}
+                        
+                        ${product.shipping_info ? `
+                            <p class="text-sm text-gray-500 mt-4">${product.shipping_info}</p>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function changeQuantity(delta) {
+            const input = document.getElementById('modal-quantity');
+            const newValue = Math.max(1, parseInt(input.value) + delta);
+            input.value = newValue;
+        }
+
+        function addToCartFromModal(product) {
+            const quantity = parseInt(document.getElementById('modal-quantity').value);
+            const variantInput = document.querySelector('input[name="variant"]:checked');
+            let variant = null;
+            let price = product.price;
+            
+            if (variantInput) {
+                variant = JSON.parse(variantInput.value);
+                price = variant.price;
+            }
+            
+            addToCart({
+                ...product,
+                price: price
+            }, variant?.size, quantity);
+            
+            closeProductModal();
+            toggleCart();
+        }
+
+        // ============== NOTIFICATION ==============
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ============== WHATSAPP ==============
+
+        function openWhatsApp() {
+            const number = siteData.site?.whatsapp_number || '923001234567';
+            const message = siteData.site?.whatsapp_greeting || 'Hello! I would like to know more about your products.';
+            window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function subscribeNewsletter(event) {
+            event.preventDefault();
+            const email = event.target.querySelector('input[type="email"]').value;
+            // Here you would typically send this to your backend
+            showNotification('Thank you for subscribing!');
+            event.target.reset();
+        }
+
+        // ============== INITIALIZE ==============
+
+        document.addEventListener('DOMContentLoaded', loadContent);
+    </script>
+</body>
+</html>

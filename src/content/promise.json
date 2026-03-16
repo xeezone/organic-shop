@@ -1,0 +1,28 @@
+{
+  "enabled": true,
+  "title": "Our Promise to You",
+  "subtitle": "We are committed to delivering the purest, most authentic organic products with complete transparency and care",
+  "promises": [
+    {
+      "icon": "shield-check",
+      "title": "100% Organic Certified",
+      "description": "All our products are certified organic, free from pesticides, chemicals, and artificial additives."
+    },
+    {
+      "icon": "hand-heart",
+      "title": "Handcrafted with Love",
+      "description": "Every product is carefully handmade in small batches using traditional methods."
+    },
+    {
+      "icon": "refresh",
+      "title": "Freshness Guarantee",
+      "description": "We make products fresh to order, ensuring maximum potency when it reaches you."
+    },
+    {
+      "icon": "customer-service-2",
+      "title": "Customer Satisfaction",
+      "description": "Your wellness journey is our priority. We ensure complete satisfaction."
+    }
+  ],
+  "image": "/media/promise.jpg"
+}

@@ -1,0 +1,31 @@
+{
+  "enabled": true,
+  "title": "How to Order",
+  "subtitle": "Simple steps to get your organic products delivered",
+  "steps": [
+    {
+      "step_number": 1,
+      "icon": "shopping-cart",
+      "title": "Choose Product",
+      "description": "Browse our organic collection and select your desired products"
+    },
+    {
+      "step_number": 2,
+      "icon": "settings-3",
+      "title": "Customize Order",
+      "description": "Select quantity, variants, and add special instructions"
+    },
+    {
+      "step_number": 3,
+      "icon": "whatsapp",
+      "title": "Order via WhatsApp",
+      "description": "Complete your order through our WhatsApp for instant confirmation"
+    },
+    {
+      "step_number": 4,
+      "icon": "truck",
+      "title": "Fast Delivery",
+      "description": "Receive your fresh organic products at your doorstep"
+    }
+  ]
+}

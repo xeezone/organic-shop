@@ -1,0 +1,47 @@
+{
+  "enabled": true,
+  "title": "Why Choose Pure Nature",
+  "subtitle": "Experience the difference of truly organic, handmade products crafted with care and dedication to your wellness",
+  "features": [
+    {
+      "icon": "leaf",
+      "title": "100% Organic",
+      "description": "Certified organic ingredients sourced directly from nature"
+    },
+    {
+      "icon": "hand-heart",
+      "title": "Handmade",
+      "description": "Carefully crafted in small batches with traditional methods"
+    },
+    {
+      "icon": "shield-check",
+      "title": "No Chemicals",
+      "description": "Free from harmful chemicals, preservatives, and artificial additives"
+    },
+    {
+      "icon": "time",
+      "title": "Fresh & Safe",
+      "description": "Made fresh to order ensuring maximum potency and safety"
+    },
+    {
+      "icon": "recycle",
+      "title": "Eco-Friendly",
+      "description": "Sustainable packaging and environmentally conscious practices"
+    },
+    {
+      "icon": "customer-service",
+      "title": "24/7 Support",
+      "description": "Always here to help with your wellness journey"
+    },
+    {
+      "icon": "truck",
+      "title": "Fast Delivery",
+      "description": "Quick and reliable delivery across the country"
+    },
+    {
+      "icon": "heart",
+      "title": "Made with Love",
+      "description": "Every product infused with care and positive energy"
+    }
+  ]
+}
