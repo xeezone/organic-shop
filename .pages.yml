@@ -1,0 +1,776 @@
+media:
+  - name: main
+    label: 📁 Main Media Library
+    input: public/media
+    output: /media
+    categories: [image, document]
+  - name: products
+    label: 📦 Product Images
+    input: public/media/products
+    output: /media/products
+    categories: [image]
+    extensions: [jpg, jpeg, png, webp, gif]
+  - name: categories
+    label: 🏷️ Category Images
+    input: public/media/categories
+    output: /media/categories
+    categories: [image]
+  - name: testimonials
+    label: 👤 Testimonial Avatars
+    input: public/media/testimonials
+    output: /media/testimonials
+    categories: [image]
+
+content:
+  - name: site_settings
+    label: ⚙️ Site Settings
+    type: file
+    path: src/content/site.json
+    fields:
+      - name: store_name
+        label: 🏪 Store Name
+        type: string
+        required: true
+        default: Pure Nature
+      - name: tagline
+        label: 📢 Tagline
+        type: string
+        default: Organic Handmade Products
+      - name: description
+        label: 📝 Site Description (SEO)
+        type: text
+        default: Premium organic handmade products for natural wellness
+      - name: keywords
+        label: 🔑 SEO Keywords
+        type: text
+        default: organic, handmade, natural, skincare, herbal oils, soaps
+      - name: currency
+        label: 💰 Currency
+        type: select
+        options:
+          values:
+            - PKR
+            - USD
+            - EUR
+        default: PKR
+      - name: currency_symbol
+        label: 💲 Currency Symbol
+        type: select
+        options:
+          values:
+            - value: PKR
+              label: ₨
+            - value: USD
+              label: $
+            - value: EUR
+              label: €
+        default: PKR
+      - name: whatsapp_number
+        label: 📱 WhatsApp Business Number
+        type: string
+        required: true
+        pattern:
+          regex: '^[0-9]+$'
+          message: Enter numbers only (e.g., 923001234567)
+        default: 923001234567
+      - name: whatsapp_message
+        label: 💬 Default WhatsApp Message
+        type: text
+        default: "Hello! I'm interested in your organic products."
+      - name: email
+        label: 📧 Contact Email
+        type: string
+        default: hello@purenature.com
+      - name: phone
+        label: 📞 Contact Phone
+        type: string
+        default: +92 300 1234567
+      - name: address
+        label: 📍 Store Address
+        type: text
+        default: "123 Organic Street, Natural City, Pakistan"
+      - name: working_hours
+        label: 🕐 Working Hours
+        type: string
+        default: Mon-Sat: 9AM - 8PM
+      - name: social_media
+        label: 🌐 Social Media Links
+        type: object
+        fields:
+          - name: facebook
+            label: Facebook URL
+            type: string
+            default: https://facebook.com/purenature
+          - name: instagram
+            label: Instagram URL
+            type: string
+            default: https://instagram.com/purenature
+          - name: twitter
+            label: Twitter URL
+            type: string
+            default: https://twitter.com/purenature
+          - name: pinterest
+            label: Pinterest URL
+            type: string
+            default: https://pinterest.com/purenature
+      - name: navigation
+        label: 🧭 Navigation Menu
+        type: object
+        list:
+          min: 3
+          max: 10
+        fields:
+          - name: label
+            label: Menu Label
+            type: string
+            required: true
+          - name: link
+            label: Link
+            type: string
+            required: true
+          - name: order
+            label: Display Order
+            type: number
+            default: 0
+
+  - name: hero_section
+    label: 🎯 Hero Section
+    type: file
+    path: src/content/hero.json
+    fields:
+      - name: enabled
+        label: Show this section?
+        type: boolean
+        default: true
+      - name: layout
+        label: Layout Style
+        type: select
+        options:
+          values:
+            - value: full
+              label: Full Screen
+            - value: half
+              label: Half Screen
+        default: full
+      - name: slides
+        label: Hero Slides
+        type: object
+        list:
+          min: 1
+          max: 5
+        fields:
+          - name: title_line1
+            label: Title Line 1
+            type: string
+            required: true
+          - name: title_line2
+            label: Title Line 2 (Highlighted)
+            type: string
+            required: true
+          - name: description
+            label: Description
+            type: text
+            required: true
+          - name: button_text
+            label: Button Text
+            type: string
+            default: Shop Now
+          - name: button_link
+            label: Button Link
+            type: string
+            default: "#products"
+          - name: background_image
+            label: Background Image
+            type: image
+            required: true
+            options:
+              media: main
+          - name: overlay_opacity
+            label: Overlay Opacity (%)
+            type: number
+            options:
+              min: 0
+              max: 100
+              step: 5
+            default: 20
+
+  - name: about_section
+    label: 📖 About Section
+    type: file
+    path: src/content/about.json
+    fields:
+      - name: enabled
+        label: Show this section?
+        type: boolean
+        default: true
+      - name: title
+        label: Section Title
+        type: string
+        required: true
+        default: Our Story of Natural Wellness
+      - name: content_blocks
+        label: Content Blocks
+        type: object
+        list:
+          min: 1
+          max: 5
+        fields:
+          - name: heading
+            label: Block Heading
+            type: string
+          - name: text
+            label: Block Text
+            type: text
+            required: true
+      - name: stats
+        label: Statistics
+        type: object
+        list:
+          max: 4
+        fields:
+          - name: number
+            label: Number
+            type: string
+          - name: label
+            label: Label
+            type: string
+      - name: promise
+        label: Brand Promise
+        type: object
+        fields:
+          - name: title
+            label: Promise Title
+            type: string
+            default: 100% Natural Promise
+          - name: text
+            label: Promise Text
+            type: string
+            default: No chemicals, no compromises
+          - name: icon
+            label: Icon
+            type: select
+            options:
+              values:
+                - leaf
+                - heart
+                - shield
+            default: leaf
+      - name: image
+        label: About Image
+        type: image
+        required: true
+        options:
+          media: main
+      - name: image_alt
+        label: Image Alt Text
+        type: string
+        default: About Pure Nature
+
+  - name: why_choose
+    label: ✨ Why Choose Us
+    type: file
+    path: src/content/why-choose.json
+    fields:
+      - name: enabled
+        label: Show this section?
+        type: boolean
+        default: true
+      - name: title
+        label: Section Title
+        type: string
+        required: true
+        default: Why Choose Pure Nature
+      - name: subtitle
+        label: Section Subtitle
+        type: text
+        default: Experience the difference of truly organic, handmade products
+      - name: features
+        label: Features
+        type: object
+        list:
+          min: 2
+          max: 12
+        fields:
+          - name: icon
+            label: Icon
+            type: select
+            required: true
+            options:
+              values:
+                - value: leaf
+                  label: 🍃 Leaf (Organic)
+                - value: hand-heart
+                  label: 🤝 Handmade
+                - value: shield-check
+                  label: 🛡️ Chemical Free
+                - value: time
+                  label: ⏰ Fresh
+                - value: recycle
+                  label: ♻️ Eco-friendly
+                - value: customer-service
+                  label: 💁 Support
+                - value: truck
+                  label: 🚚 Fast Delivery
+          - name: title
+            label: Feature Title
+            type: string
+            required: true
+          - name: description
+            label: Feature Description
+            type: string
+            required: true
+
+  - name: product_categories
+    label: 🏷️ Product Categories
+    type: file
+    path: src/content/categories.json
+    fields:
+      - name: enabled
+        label: Show categories section?
+        type: boolean
+        default: true
+      - name: title
+        label: Section Title
+        type: string
+        default: Our Product Categories
+      - name: subtitle
+        label: Section Subtitle
+        type: string
+        default: Explore our curated collection
+      - name: categories
+        label: Categories
+        type: object
+        list:
+          min: 1
+          max: 20
+        fields:
+          - name: id
+            label: Category ID
+            type: string
+            required: true
+          - name: name
+            label: Category Name
+            type: string
+            required: true
+          - name: description
+            label: Short Description
+            type: string
+          - name: image
+            label: Category Image
+            type: image
+            options:
+              media: categories
+          - name: display_order
+            label: Display Order
+            type: number
+            default: 0
+
+  - name: products
+    label: 🛍️ Manage Products
+    type: collection
+    path: src/content/products
+    view:
+      fields: [name, category, price, in_stock]
+      primary: name
+    fields:
+      - name: name
+        label: 📛 Product Name
+        type: string
+        required: true
+      - name: category
+        label: 🏷️ Category
+        type: select
+        required: true
+        options:
+          values:
+            - value: skincare
+              label: Skincare
+            - value: oils
+              label: Herbal Oils
+            - value: soaps
+              label: Natural Soaps
+            - value: foods
+              label: Organic Foods
+            - value: teas
+              label: Herbal Teas
+      - name: short_description
+        label: 📝 Short Description
+        type: text
+        required: true
+      - name: full_description
+        label: 📄 Full Description
+        type: rich-text
+        required: true
+      - name: price
+        label: 💲 Price
+        type: number
+        required: true
+      - name: compare_at_price
+        label: 💲 Compare at Price
+        type: number
+      - name: on_sale
+        label: 🏷️ On Sale?
+        type: boolean
+        default: false
+      - name: sale_price
+        label: 💲 Sale Price
+        type: number
+      - name: rating
+        label: ⭐ Rating
+        type: number
+        options:
+          min: 0
+          max: 5
+          step: 0.1
+        default: 5
+      - name: reviews_count
+        label: 📊 Number of Reviews
+        type: number
+        default: 0
+      - name: in_stock
+        label: ✅ In Stock?
+        type: boolean
+        default: true
+      - name: stock_quantity
+        label: 📦 Stock Quantity
+        type: number
+        default: 100
+      - name: badges
+        label: 🏷️ Product Badges
+        type: object
+        list: true
+        fields:
+          - name: type
+            label: Badge Type
+            type: select
+            options:
+              values:
+                - value: bestseller
+                  label: ⭐ Best Seller
+                - value: new
+                  label: 🆕 New Arrival
+                - value: sale
+                  label: 🔥 Sale
+          - name: text
+            label: Badge Text
+            type: string
+      - name: main_image
+        label: 🖼️ Main Image
+        type: image
+        required: true
+        options:
+          media: products
+      - name: gallery_images
+        label: 🖼️ Additional Images
+        type: image
+        list: true
+        options:
+          media: products
+      - name: variants
+        label: 📏 Product Variants
+        type: object
+        list: true
+        fields:
+          - name: size
+            label: Size/Option
+            type: string
+            required: true
+          - name: price
+            label: Price
+            type: number
+            required: true
+          - name: in_stock
+            label: In Stock?
+            type: boolean
+            default: true
+      - name: ingredients
+        label: 🌿 Key Ingredients
+        type: text
+        list: true
+      - name: benefits
+        label: ✨ Benefits
+        type: text
+        list: true
+      - name: how_to_use
+        label: 📋 How to Use
+        type: rich-text
+      - name: weight
+        label: ⚖️ Weight (grams)
+        type: number
+      - name: shelf_life
+        label: ⏰ Shelf Life
+        type: string
+        default: 12 months
+      - name: meta_title
+        label: 🔍 SEO Title
+        type: string
+      - name: meta_description
+        label: 🔍 SEO Description
+        type: text
+
+  - name: best_sellers_section
+    label: ⭐ Best Sellers Section
+    type: file
+    path: src/content/best-sellers.json
+    fields:
+      - name: enabled
+        label: Show this section?
+        type: boolean
+        default: true
+      - name: title
+        label: Section Title
+        type: string
+        default: Best Sellers
+      - name: subtitle
+        label: Section Subtitle
+        type: string
+        default: Our most loved products
+      - name: products_to_show
+        label: Select Products
+        type: reference
+        list: true
+        options:
+          collection: products
+          multiple: true
+          search: "name"
+          label: "{name}"
+
+  - name: ordering_process
+    label: 📦 How to Order
+    type: file
+    path: src/content/ordering.json
+    fields:
+      - name: enabled
+        label: Show this section?
+        type: boolean
+        default: true
+      - name: title
+        label: Section Title
+        type: string
+        default: How to Order
+      - name: subtitle
+        label: Section Subtitle
+        type: string
+        default: Simple steps to get your products
+      - name: steps
+        label: Ordering Steps
+        type: object
+        list:
+          min: 2
+          max: 6
+        fields:
+          - name: step_number
+            label: Step Number
+            type: number
+            required: true
+          - name: icon
+            label: Icon
+            type: select
+            options:
+              values:
+                - shopping-cart
+                - settings-3
+                - whatsapp
+                - truck
+          - name: title
+            label: Step Title
+            type: string
+            required: true
+          - name: description
+            label: Description
+            type: text
+            required: true
+
+  - name: testimonials
+    label: 💬 Customer Reviews
+    type: collection
+    path: src/content/testimonials
+    view:
+      fields: [customer_name, rating, approved]
+    fields:
+      - name: customer_name
+        label: 👤 Customer Name
+        type: string
+        required: true
+      - name: rating
+        label: ⭐ Rating
+        type: number
+        required: true
+        options:
+          min: 1
+          max: 5
+        default: 5
+      - name: review_text
+        label: 💭 Review
+        type: text
+        required: true
+      - name: city
+        label: 🏙️ City
+        type: string
+      - name: product_purchased
+        label: 🛍️ Product Purchased
+        type: string
+      - name: avatar
+        label: 🖼️ Customer Photo
+        type: image
+        options:
+          media: testimonials
+      - name: verified_purchase
+        label: ✅ Verified Purchase
+        type: boolean
+        default: true
+      - name: approved
+        label: ✅ Approved to Show
+        type: boolean
+        default: true
+      - name: featured
+        label: ⭐ Feature on Homepage
+        type: boolean
+        default: false
+
+  - name: our_promise
+    label: 🤝 Our Promise
+    type: file
+    path: src/content/promise.json
+    fields:
+      - name: enabled
+        label: Show this section?
+        type: boolean
+        default: true
+      - name: title
+        label: Section Title
+        type: string
+        default: Our Promise to You
+      - name: subtitle
+        label: Section Subtitle
+        type: text
+        default: We are committed to your satisfaction
+      - name: promises
+        label: Promise Items
+        type: object
+        list:
+          min: 2
+          max: 8
+        fields:
+          - name: icon
+            label: Icon
+            type: select
+            options:
+              values:
+                - shield-check
+                - hand-heart
+                - refresh
+                - customer-service-2
+          - name: title
+            label: Promise Title
+            type: string
+            required: true
+          - name: description
+            label: Description
+            type: text
+            required: true
+      - name: image
+        label: Promise Image
+        type: image
+        options:
+          media: main
+
+  - name: faq
+    label: ❓ Frequently Asked Questions
+    type: collection
+    path: src/content/faq
+    view:
+      fields: [question, order]
+    fields:
+      - name: question
+        label: ❓ Question
+        type: string
+        required: true
+      - name: answer
+        label: 💡 Answer
+        type: rich-text
+        required: true
+      - name: category
+        label: 🏷️ Category
+        type: select
+        options:
+          values:
+            - General
+            - Shipping
+            - Payment
+            - Products
+        default: General
+      - name: order
+        label: 🔢 Display Order
+        type: number
+        default: 0
+      - name: featured
+        label: ⭐ Featured
+        type: boolean
+        default: false
+
+  - name: footer
+    label: 🦶 Footer
+    type: file
+    path: src/content/footer.json
+    fields:
+      - name: show_newsletter
+        label: Show Newsletter Signup?
+        type: boolean
+        default: true
+      - name: newsletter_title
+        label: Newsletter Title
+        type: string
+        default: Subscribe to Our Newsletter
+      - name: newsletter_text
+        label: Newsletter Text
+        type: text
+        default: Get updates on new products and special offers
+      - name: description
+        label: Footer Description
+        type: text
+        default: Bringing you the finest organic, handmade products for natural wellness.
+      - name: quick_links
+        label: 🔗 Quick Links
+        type: object
+        list: true
+        fields:
+          - name: text
+            label: Link Text
+            type: string
+          - name: url
+            label: URL
+            type: string
+      - name: footer_categories
+        label: 🏷️ Footer Categories
+        type: reference
+        list: true
+        options:
+          collection: product_categories
+          multiple: true
+      - name: copyright_text
+        label: ©️ Copyright Text
+        type: string
+        default: "© 2024 Pure Nature. All rights reserved."
+      - name: payment_methods
+        label: 💳 Accepted Payments
+        type: object
+        list: true
+        fields:
+          - name: method
+            label: Payment Method
+            type: select
+            options:
+              values:
+                - Cash on Delivery
+                - JazzCash
+                - EasyPaisa
+                - Bank Transfer
+          - name: icon
+            label: Icon
+            type: select
+            options:
+              values:
+                - money
+                - bank
+                - credit-card
